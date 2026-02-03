@@ -207,5 +207,6 @@ function updateBackground(weather, isNight) {
 }
 
 window.addEventListener('load', () => {
-    getWeather("東京");
+    getWeather("Tokyo");
 });
+
