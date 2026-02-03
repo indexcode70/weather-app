@@ -15,7 +15,11 @@ const thunderContainer = document.getElementById('thunder-container');
 
 
 async function getWeather(city) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apikey}&units=metric&lang=ja`;
+    // 都市名の後に「,jp」を自動で付け足す(日本国内に限定される)
+    // これで「東京」が「東京,jp」で検索され、制度が上がる
+    const searchName = city.includes(',') ? city : `${city},jp`;
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchName)}&appid=${apikey}&units=metric&lang=JP`;
 
     try {
         const response = await fetch(url);
@@ -28,13 +32,19 @@ async function getWeather(city) {
 
         locationElt.innerText = data.name;
         tempElt.innerText = `${Math.round(data.main.temp)} ℃`;
-        descElt.innerText = data.weather[0].description;
+        
+        // 時間をチェエク(夜かどうか)
+        const now = new Date();
+        const hour = now.getHours();
+        const isNight = hour >= 18 || hour < 6;
+
+        descElt.innerText = data.weather[0].description + (isNight ? " (夜)" : "");
 
         const iconCode = data.weather[0].icon;
         iconElt.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
         iconElt.alt = data.weather[0].description;
 
-        updateBackground(data.weather[0].main);
+        updateBackground(data.weather[0].main, isNight);  // isNightを逃がす
 
     } catch (error) {
         console.error(error);
@@ -49,7 +59,25 @@ searchBtn.addEventListener('click', () => {
     }
 });
 
-function updateBackground(weather) {
+cityInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        const cityName = cityInput.value;
+        if (cityName) {
+            getWeather(cityName);
+        }
+    }
+});
+
+function updateBackground(weather, isNight) {
+
+    // 一旦クラスを外す
+    document.body.classList.remove('night-mode');
+
+    if (isNight) {
+        document.body.classList.add('night-mode');
+        // 夜の時は太陽のコンテナを動かさない
+    }
+
     let bgColor = "";
 
     // 以前の天候をリセット
@@ -65,16 +93,21 @@ function updateBackground(weather) {
 
     //-----------晴れ----------
     if (weather === "Clear") {
-        bgColor = "linear-gradient(to bottom, #f7b733, #fc4a1a)";
+        if (isNight) {
+            bgColor = "linear-gradient(to bottom, #232526, #414345)";  // 夜の背景
+            descElt.innerText += " (夜)";
+            // 夜なので太陽は出さない(sunContainerをactiveにしない)
+        } else {
+            bgColor = "linear-gradient(to bottom, #f7b733, #fc4a1a)";
         
-        // 太陽の演出を追加
-        sunContainer.classList.add('active');
-        // 太陽本体と光線を作成して入れる
-        sunContainer.innerHTML = `
-        <div class="sun-rays"></div>
-        <div class="sun"></div>
-        `;
-        
+             // 太陽の演出を追加
+            sunContainer.classList.add('active');
+             // 太陽本体と光線を作成して入れる
+            sunContainer.innerHTML = `
+            <div class="sun-rays"></div>
+            <div class="sun"></div>
+            `;
+        }
 
     //----------くもり----------
     } else if (weather === "Clouds") {
@@ -177,4 +210,4 @@ function updateBackground(weather) {
 }
 
 // 最初に東京の天気を出す
-getWeather("tokyo");
+getWeather("東京");
