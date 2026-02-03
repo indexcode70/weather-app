@@ -19,12 +19,13 @@ async function getWeather(city) {
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apikey}&units=metric&lang=ja`;
     try {
         const response = await fetch(url);
-        const data = await response.json();
 
-        if (data.cod === "404") {
-            descElt.innerText = "都市名が見つかりませんでした";
+        if (!response.ok) {
+            descElt.innerText = "都市名が見つかりませんでした (404)";
             return;
         }
+
+        const data = await response.json();
 
         locationElt.innerText = data.name;
         tempElt.innerText = `${Math.round(data.main.temp)} ℃`;
