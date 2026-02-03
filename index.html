@@ -1,41 +1,250 @@
-<!DOCTYPE html>
-<html lang="ja">
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
 
-<head>
-<meta charset="UTF-8">
-<title>お天気</title>
-<link rel="stylesheet" href="style.css">
-</head>
+    /* デフォルトの背景(読み込み中) */
+    background: linear-gradient(to bottom, #6dd5ed, #2193b0);
+    background-size: cover;
+    background-position: center;
+    transition: background 1.0s ease; /* 背景変化を滑らかに */
+    }
 
-<body>
-    <div id="rain-container"></div>
-    <div id="sun-container"></div>
-    <div id="cloud-container"></div>
-    <div id="snow-container"></div>
-    <div id="thunder-container"></div>
+body.night-mode {
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e) !important;
+}
+
+.weather-card {
+    background: rgba(255, 255, 255, 0.3);  /* 白を少し透けさせる */
+    backdrop-filter: blur(15px);     /* 後ろをぼかす */
+    padding: 30px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+    color: white;
+    width: 90%;
+    max-width: 400px;  /* スマホで見た時に幅を最大で400pxでも画面が小さければ90%にする */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 480px) {
+    #temp {
+        font-size: 3rem;  /* スマホでは温度を小さく */
+    }
+}
+
+#temp {
+    font-size: 4rem;
+    margin: 10px 0;
+    font-weight: bold;
+    }
+
+.search-box {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+#city-input {
+    padding: 8px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    width: 100%;
+}
+
+#search-button {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: none;
+    background: #333;
+    color: white;
+    cursor: pointer;
+}
+
+/* アイコンをふわふわさせる(小さなアニメーション) */
+#weather-icon {
+    width: 100px;
+    height: 100px;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+} 
+
+/* 雨の粒を細長い線にして上から下にループさせる */
+#rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;  /* 検索ボタンの邪魔をしないようにする */
+    z-index: 0; 
+    display: none;  /* デフォルトは消しておく */
+}
+
+/* 雨が降っている状態の時だけ表示 */
+#rain-container.active {
+    display: block;
+}
+
+/* 雨粒のスタイル */
+.drop {
+    position: absolute;
+    background: rgba(255,255,255, 0.6);
+    width: 2px;
+    height: 15px;
+    top: -20px;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+#sun-container {
+    position: fixed;
+    top: -50px;
+    right: -50px; /* 右上に配置 */
+    width: 300px;
+    height: 300px;
+    display: none;  /* デフォルトは非表示 */
+    z-index: 0;
+}
+
+/* 晴れの時に表示 */
+#sun-container.active {
+    display: block;
+}
+
+/* 太陽全体 */
+.sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, #fffc00 0%, #ffcc00 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 60px #ffcc00;
+    animation: pulse 4s ease-in-out infinite;  /* 拍動するようなアニメーション */
+}
 
 
-    <div class="weather-card">
-        <div class="search-box">
-            <input type="text" id="city-input" placeholder="都市を英語で入力(例:Tokyo)">
-            <button id="search-button">検索</button>
-        </div> 
+/* 太陽の光線 */
+.sun-rays {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 255, 255, 0.2) 0deg 20deg,
+        transparent 20deg 40deg
+    );
+    border-radius: 50%;
+    animation: rotate-sun 20s linear infinite;  /* ゆっくり回転 */
+}
 
-        <h1 id="location">都市名</h1>
-        <div id="icon-container">
-           <img id="weather-icon" src="" alt="">
-        </div>
+@keyframes rotate-sun {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
-        <p id="temp">--℃</p>
-        <p id="description">天気を読み込み中...</p>
-    </div>
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
 
-    <script src="config.js"></script>
-    <script src="script.js"></script>
+#cloud-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: none;
+    z-index: 0;
+}
 
-</body>
+#cloud-container.active {
+          display: block !important;
+}
 
-</html>
+/* 雲の形 */
+.cloud {
+    position: absolute;
+    /* 最後を 0.9 にして、色を濃くする */
+    background: rgba(255, 255, 255, 0.9); 
+    width: 200px;
+    height: 70px; /* 少し太く */
+    border-radius: 50px;
+    /* 影をつけて、背景から浮かび上がらせる */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+    z-index: 1; 
+    animation: drift linear infinite;
+    /* 初期位置を画面の外に固定 */
+    left: -250px; 
+}
 
+/* アニメーションの出発点と到着点*/
+@keyframes drift {
+    from { left: -50px; }
+    to { left: 100%; }
+}
+
+.snow {
+    position: absolute;
+    top: -10px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.9;
+    animation: fall linear infinite, sway ease-in-out infinite;
+}
+
+@keyframes fall {
+    to { transform: translateY(100vh); }
+}
+
+@keyframes sway {
+    0%, 100% { margin-left: 0; }
+    50% { margin-left: 20px; }  /* 左右にゆらゆら */
+}
+
+#thunder-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: none;
+    z-index: 10;  /* 一番手前で光らせる */
+}
+
+#thunder-container.active {
+    display: block;
+    animation: flash 3s infinite;  /* 3秒に1回くらい光る */
+}
+
+@keyframes flash {
+    0%, 90%, 100% { background: transparent; }
+    92% { background: rgba(255, 255, 255, 0.6); }  /* 一瞬白くなる */
+    94% { background: transparent; }
+    96% { background: rgba(255, 255, 255, 0.4); } /* 2回光るとリアル */
+}
 
 
