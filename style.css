@@ -13,6 +13,10 @@ body {
     transition: background 1.0s ease; /* 背景変化を滑らかに */
     }
 
+body.night-mode {
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e) !important;
+}
+
 .weather-card {
     background: rgba(255, 255, 255, 0.3);  /* 白を少し透けさせる */
     backdrop-filter: blur(15px);     /* 後ろをぼかす */
