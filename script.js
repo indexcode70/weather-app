@@ -19,8 +19,7 @@ async function getWeather(city) {
     // これで「東京」が「東京,jp」で検索され、制度が上がる
     const searchName = city.includes(',') ? city : `${city},jp`;
 
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(searchName)}&appid=${apikey}&units=metric&lang=ja`;
-
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apikey}&units=metric&lang=ja`;
     try {
         const response = await fetch(url);
         const data = await response.json();
@@ -211,4 +210,3 @@ function updateBackground(weather, isNight) {
 
 // 最初に東京の天気を出す
 getWeather("東京");
-
