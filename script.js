@@ -1,180 +1,238 @@
-// 直接書かずに、config.jsの中身を見に行くようにする
-const apikey = config.apikey;
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
 
-// HTMLの部品を捕まえる
-const locationElt = document.getElementById('location');
-const tempElt = document.getElementById('temp');
-const descElt = document.getElementById('description');
-const iconElt = document.getElementById('weather-icon');
-const cityInput = document.getElementById('city-input');
-const searchBtn = document.getElementById('search-button');
-const rainContainer = document.getElementById('rain-container');
-const sunContainer = document.getElementById('sun-container');
-const cloudContainer = document.getElementById('cloud-container');
-const thunderContainer = document.getElementById('thunder-container');
+    /* デフォルトの背景(読み込み中) */
+    background: linear-gradient(to bottom, #6dd5ed, #2193b0);
+    background-size: cover;
+    background-position: center;
+    transition: background 1.0s ease; /* 背景変化を滑らかに */
+    }
 
+.weather-card {
+    background: rgba(255, 255, 255, 0.3);  /* 白を少し透けさせる */
+    backdrop-filter: blur(15px);     /* 後ろをぼかす */
+    padding: 40px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
 
-async function getWeather(city) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apikey}&units=metric&lang=ja`;
+#temp {
+    font-size: 4rem;
+    margin: 10px 0;
+    font-weight: bold;
+    }
 
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
+.search-box {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+}
 
-        if (data.cod === "404") {
-            descElt.innerText = "都市名が見つかりませんでした";
-            return;
-        }
+#city-input {
+    padding: 8px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    width: 100%;
+}
 
-        locationElt.innerText = data.name;
-        tempElt.innerText = `${Math.round(data.main.temp)} ℃`;
-        descElt.innerText = data.weather[0].description;
+#search-button {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: none;
+    background: #333;
+    color: white;
+    cursor: pointer;
+}
 
-        const iconCode = data.weather[0].icon;
-        iconElt.src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-        iconElt.alt = data.weather[0].description;
+/* アイコンをふわふわさせる(小さなアニメーション) */
+#weather-icon {
+    width: 100px;
+    height: 100px;
+    animation: float 3s ease-in-out infinite;
+}
 
-        updateBackground(data.weather[0].main);
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+} 
 
-    } catch (error) {
-        console.error(error);
-        descElt.innerText = "エラー:天気を読み込めませんでした";
+/* 雨の粒を細長い線にして上から下にループさせる */
+#rain-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;  /* 検索ボタンの邪魔をしないようにする */
+    z-index: 0; 
+    display: none;  /* デフォルトは消しておく */
+}
+
+/* 雨が降っている状態の時だけ表示 */
+#rain-container.active {
+    display: block;
+}
+
+/* 雨粒のスタイル */
+.drop {
+    position: absolute;
+    background: rgba(255,255,255, 0.6);
+    width: 2px;
+    height: 15px;
+    top: -20px;
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
     }
 }
 
-searchBtn.addEventListener('click', () => {
-    const cityName = cityInput.value;
-    if (cityName) {
-        getWeather(cityName);
-    }
-});
-
-function updateBackground(weather) {
-    let bgColor = "";
-
-    // 以前の天候をリセット
-    rainContainer.classList.remove('active'); 
-    rainContainer.innerHTML = "";
-    sunContainer.classList.remove('active');
-    sunContainer.innerHTML = ""; 
-    cloudContainer.classList.remove('active');
-    cloudContainer.innerHTML = "";
-    thunderContainer.classList.remove('active');
-    thunderContainer.innerHTML = "";
-
-
-    //-----------晴れ----------
-    if (weather === "Clear") {
-        bgColor = "linear-gradient(to bottom, #f7b733, #fc4a1a)";
-        
-        // 太陽の演出を追加
-        sunContainer.classList.add('active');
-        // 太陽本体と光線を作成して入れる
-        sunContainer.innerHTML = `
-        <div class="sun-rays"></div>
-        <div class="sun"></div>
-        `;
-        
-
-    //----------くもり----------
-    } else if (weather === "Clouds") {
-        bgColor = "linear-gradient(to bottom, #bdc3c7, #2c3e50)"; 
-
-        cloudContainer.classList.add('active');
-
-        // 8つの雲をランダムで作る
-        for (let i = 0; i < 12; i++) {
-            const cloud = document.createElement('div');
-            cloud.className = 'cloud';
-
-        // 雲事に高さ(top)や速さ、大きさをバラバラにする
-        cloud.style.top = Math.random() * 60 + '%';  
-
-        // 遠くの雲と近くの雲をランダムに作る
-        const isFar = Math.random() > 0.5; // 50%の確率で遠くの雲にする
-
-        if (isFar) {
-            // 遠くの雲(小さく、薄く、ゆっくり)
-            cloud.style.transform = `scale(${Math.random() * 0.4 + 0.4})`;
-            cloud.style.opacity = Math.random() * 0.2 + 0.2;
-            cloud.style.animationDuration = Math.random() * 20 + 50 + 's';
-            cloud.style.zIndex = "0";
-
-        } else {
-            // 近くの雲(大きく、濃く、少し速い)
-        cloud.style.transform = `scale(${Math.random() * 0.4 + 0.4})`;
-        cloud.style.opacity = Math.random() * 0.3 + 0.5; // 透明度をランダムにする
-        cloud.style.animationDuration = Math.random() * 15 + 25 + 's';  // 25~48秒 
-        cloud.style.zIndex = "1";
-        }
-
-        // 出現タイミングをバラバラにして「列」を増やす
-        cloud.style.animationDelay = Math.random() * 30 + 's';
-
-        // 最初の2個くらいはすぐに出す
-        if (i< 2) {
-            cloud.style.animationDelay = '0s';
-            }
-
-        cloudContainer.appendChild(cloud);
-        }
-
-
-
-    //----------雨----------
-    } else if (weather === "Rain") {
-        bgColor = "linear-gradient(to bottom, #4b6cb7, #182848)"; 
-
-        // 雨を降らせる演出
-        rainContainer.classList.add('active');
-        for (let i = 0; i < 50; i++) {
-            const drop = document.createElement('div');
-            drop.className = 'drop';
-            drop.style.left = Math.random() * 100 + '%';
-            drop.style.animationDuration = Math.random() * 0.5 + 0.5 + 's';
-            drop.style.animationDelay = Math.random() * 2 + 's';
-            rainContainer.appendChild(drop);
-        }
-   
-    
-    //----------雪-----------
-   } else if (weather === "Snow") {
-        bgColor = "linear-gradient(to bottom, #cfd9df, #a1c4fd)";
-        rainContainer.classList.add(`active`);
-
-        for (let i = 0; i < 50; i++) {
-            const flake = document.createElement('div');
-            flake.className = 'snow'; // CSSで設定した　snow クラス
-            flake.style.left = Math.random() * 100 + '%';
-            flake.style.width = flake.style.height = Math.random() * 5 + 5 + 'px';  // 大きさバラバラ
-            flake.style.animationDuration = Math.random() * 3 + 4 + 's'; //ゆっくり降る
-            flake.style.animationDelay = Math.random() * 5 + 's';
-            rainContainer.appendChild(flake);
-        }
-
-    //----------雷-----------
-
-    } else if (weather === "Thunderstorm") {
-        bgColor = "linear-gradient(to bottom, #1e130c, #9a8478)";  //こわい雰囲気の色
-        thunderContainer.classList.add('active');
-
-        rainContainer.classList.add('active'); // 雨用コンテナも使う
-        for (let i = 0; i < 70; i++) { // 雷の時は少し多めの70個
-            const drop = document.createElement('div');
-            drop.className = 'drop';
-            drop.style.left = Math.random() * 100 + '%';
-            // 雷の時は少し速めに降らせて迫力を出す
-            drop.style.animationDuration = Math.random() * 0.3 + 0.3 + 's';
-            drop.style.animationDelay = Math.random() * 2 + 's';
-            rainContainer.appendChild(drop);
-            }
-        
-     } else {
-        bgColor = "linear-gradient(to bottom, #6dd5ed, #2193b0)"; 
-    }
-    
-    document.body.style.background = bgColor;
+#sun-container {
+    position: fixed;
+    top: -50px;
+    right: -50px; /* 右上に配置 */
+    width: 300px;
+    height: 300px;
+    display: none;  /* デフォルトは非表示 */
+    z-index: 0;
 }
 
-// 最初に東京の天気を出す
-getWeather("tokyo");
+/* 晴れの時に表示 */
+#sun-container.active {
+    display: block;
+}
+
+/* 太陽全体 */
+.sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, #fffc00 0%, #ffcc00 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 60px #ffcc00;
+    animation: pulse 4s ease-in-out infinite;  /* 拍動するようなアニメーション */
+}
+
+
+/* 太陽の光線 */
+.sun-rays {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 250px;
+    height: 250px;
+    background: repeating-conic-gradient(
+        from 0deg,
+        rgba(255, 255, 255, 0.2) 0deg 20deg,
+        transparent 20deg 40deg
+    );
+    border-radius: 50%;
+    animation: rotate-sun 20s linear infinite;  /* ゆっくり回転 */
+}
+
+@keyframes rotate-sun {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+    50% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+#cloud-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: none;
+    z-index: 0;
+}
+
+#cloud-container.active {
+          display: block !important;
+}
+
+/* 雲の形 */
+.cloud {
+    position: absolute;
+    /* 最後を 0.9 にして、色を濃くする */
+    background: rgba(255, 255, 255, 0.9); 
+    width: 200px;
+    height: 70px; /* 少し太く */
+    border-radius: 50px;
+    /* 影をつけて、背景から浮かび上がらせる */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+    z-index: 1; 
+    animation: drift linear infinite;
+    /* 初期位置を画面の外に固定 */
+    left: -250px; 
+}
+
+/* アニメーションの出発点と到着点*/
+@keyframes drift {
+    from { left: -50px; }
+    to { left: 100%; }
+}
+
+.snow {
+    position: absolute;
+    top: -10px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.9;
+    animation: fall linear infinite, sway ease-in-out infinite;
+}
+
+@keyframes fall {
+    to { transform: translateY(100vh); }
+}
+
+@keyframes sway {
+    0%, 100% { margin-left: 0; }
+    50% { margin-left: 20px; }  /* 左右にゆらゆら */
+}
+
+#thunder-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    display: none;
+    z-index: 10;  /* 一番手前で光らせる */
+}
+
+#thunder-container.active {
+    display: block;
+    animation: flash 3s infinite;  /* 3秒に1回くらい光る */
+}
+
+@keyframes flash {
+    0%, 90%, 100% { background: transparent; }
+    92% { background: rgba(255, 255, 255, 0.6); }  /* 一瞬白くなる */
+    94% { background: transparent; }
+    96% { background: rgba(255, 255, 255, 0.4); } /* 2回光るとリアル */
+}
+
+
