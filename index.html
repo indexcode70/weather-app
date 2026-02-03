@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<title>お天気</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="rain-container"></div>
+    <div id="sun-container"></div>
+    <div id="cloud-container"></div>
+    <div id="snow-container"></div>
+    <div id="thunder-container"></div>
+
+
+    <div class="weather-card">
+        <div class="search-box">
+            <input type="text" id="city-input" placeholder="都市名を英語で入力 (ex: London)">
+            <button id="search-button">検索</button>
+        </div> 
+
+        <h1 id="location">都市名</h1>
+        <div id="icon-container">
+           <img id="weather-icon" src="" alt="">
+        </div>
+
+        <p id="temp">--℃</p>
+        <p id="description">天気を読み込み中...</p>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+
+</body>
+
+</html>
