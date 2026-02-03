@@ -15,9 +15,6 @@ const thunderContainer = document.getElementById('thunder-container');
 
 
 async function getWeather(city) {
-    // 都市名の後に「,jp」を自動で付け足す(日本国内に限定される)
-    // これで「東京」が「東京,jp」で検索され、制度が上がる
-    const searchName = city.includes(',') ? city : `${city},jp`;
 
     const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apikey}&units=metric&lang=ja`;
     try {
@@ -32,7 +29,7 @@ async function getWeather(city) {
         locationElt.innerText = data.name;
         tempElt.innerText = `${Math.round(data.main.temp)} ℃`;
         
-        // 時間をチェエク(夜かどうか)
+        // 時間をチェック(夜かどうか)
         const now = new Date();
         const hour = now.getHours();
         const isNight = hour >= 18 || hour < 6;
@@ -208,5 +205,6 @@ function updateBackground(weather, isNight) {
     document.body.style.background = bgColor;
 }
 
-// 最初に東京の天気を出す
-getWeather("東京");
+window.addEventListener('load', () => {
+    getWeather("東京");
+});
