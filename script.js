@@ -210,3 +210,17 @@ window.addEventListener('load', () => {
     getWeather("Tokyo");
 });
 
+// placeholderを画面サイズに合わせて書き換える関数
+
+function updatePlaceholder() {
+    const cityInput = document.getElementById('city-input');
+
+    // 画面の横幅が480px以下(スマホ)の場合
+    if (window.innerWidth <= 480) {      // window.innerWidthでブラウザで表示されてる画面の横幅を数字で取得する
+        cityInput.placeholder = "都市名をローマ字で入力(例:tokyo)";
+    }
+}
+
+// ページを読み込んだ時と、画面サイズを変えた時に実行する
+window.addEventListener('load', updatePlaceholder);
+window.addEventListener('resize', updatePlaceholder);
