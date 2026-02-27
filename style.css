@@ -20,14 +20,18 @@ body.night-mode {
 .weather-card {
     background: rgba(255, 255, 255, 0.3);  /* 白を少し透けさせる */
     backdrop-filter: blur(15px);     /* 後ろをぼかす */
-    padding: 40px;
+    padding: 30px 20px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     text-align: center;
     color: white;
+    width: 90%;
+    max-width: 400px;  /* スマホで見た時に幅を最大で400pxでも画面が小さければ90%にする */
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
+
+
 
 #temp {
     font-size: 4rem;
@@ -39,6 +43,10 @@ body.night-mode {
     margin-bottom: 20px;
     display: flex;
     gap: 10px;
+}
+
+.search-box input {
+    text-align: center;
 }
 
 #city-input {
@@ -240,3 +248,44 @@ body.night-mode {
 }
 
 
+@media (max-width: 480px) {
+   
+    .weather-card {
+    /* カードの大きさを縮めて、背景が見えるように調整 */
+    width: 85%;
+    padding: 15px 10px;
+    border-radius: 15px;
+    }
+
+    #location {
+        font-size: 1.5rem;
+        margin-top: 5px;
+    }
+
+    #weather-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+     #temp {
+        font-size: 3rem;  /* スマホでは温度を小さく */
+        margin: 5px 0;
+    }
+
+    #description {
+        font-size: 0.9rem;   /* 天気を読み込み中の文字を小さく */
+    }
+
+    .search-box {
+        margin-bottom: 10px;  /* カード内の余白を詰める */
+        gap: 5px;  /* 入力欄とボタンの間隔を詰める */
+    }
+
+    #city-input, #search-button {
+        padding: 6px 10px;  /* 入力欄とボタンの上下余白を8pxから6pxに */
+        font-size: 0.9rem; 
+    }
+
+
+
+}
