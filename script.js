@@ -224,3 +224,5 @@ function updatePlaceholder() {
 // ページを読み込んだ時と、画面サイズを変えた時に実行する
 window.addEventListener('load', updatePlaceholder);
 window.addEventListener('resize', updatePlaceholder);
+
+ 
